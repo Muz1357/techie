@@ -9,17 +9,29 @@ class LoginPage extends StatelessWidget {
     final isPortrait =
         MediaQuery.of(context).orientation == Orientation.portrait;
 
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
+    final List<Map<String, String>> users = [
+      {
+        'email': 'customer@example.com',
+        'password': 'customer123',
+        'role': 'customer',
+      },
+      {'email': 'admin@example.com', 'password': 'admin123', 'role': 'admin'},
+    ];
+
     return Scaffold(
-      backgroundColor: Colors.white, // Set background to white
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Color(0xFF6BC6E4),
+        backgroundColor: const Color(0xFF6BC6E4),
         automaticallyImplyLeading: false,
         elevation: 0,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Image.asset('assets/images/icon2.png', width: 40, height: 40),
-            CircleAvatar(
+            const CircleAvatar(
               radius: 20,
               backgroundImage: AssetImage('assets/icons/icon1.png'),
             ),
@@ -27,7 +39,6 @@ class LoginPage extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
-        // Wrap the entire body in a scrollable view
         child: Column(
           children: [
             isPortrait
@@ -36,7 +47,7 @@ class LoginPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 16), // Space below the AppBar
+                      const SizedBox(height: 16),
                       const Text(
                         'Log In',
                         style: TextStyle(
@@ -71,6 +82,7 @@ class LoginPage extends StatelessWidget {
                       const Text('Username'),
                       const SizedBox(height: 6),
                       TextField(
+                        controller: emailController,
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.white,
@@ -95,6 +107,7 @@ class LoginPage extends StatelessWidget {
                       const Text('Password'),
                       const SizedBox(height: 6),
                       TextField(
+                        controller: passwordController,
                         obscureText: true,
                         decoration: InputDecoration(
                           filled: true,
@@ -120,13 +133,40 @@ class LoginPage extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            final email = emailController.text.trim();
+                            final password = passwordController.text.trim();
+
+                            final matchedUser = users.firstWhere(
+                              (user) =>
+                                  user['email'] == email &&
+                                  user['password'] == password,
+                              orElse: () => {},
+                            );
+
+                            if (matchedUser.isNotEmpty) {
+                              if (matchedUser['role'] == 'customer') {
+                                Navigator.pushNamed(context, '/dashboard');
+                              } else if (matchedUser['role'] == 'admin') {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/admin_dashboard',
+                                );
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Invalid email or password'),
+                                ),
+                              );
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
-                            backgroundColor: Color(0xFF6BC6E4),
+                            backgroundColor: const Color(0xFF6BC6E4),
                           ),
                           child: const Text(
                             'Login',
@@ -138,9 +178,7 @@ class LoginPage extends StatelessWidget {
                   ),
                 )
                 : Padding(
-                  padding: const EdgeInsets.only(
-                    top: 16,
-                  ), // Space between AppBar and content
+                  padding: const EdgeInsets.only(top: 16),
                   child: Row(
                     children: [
                       Expanded(
@@ -149,9 +187,7 @@ class LoginPage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const SizedBox(
-                                height: 16,
-                              ), // Space below the AppBar
+                              const SizedBox(height: 16),
                               const Text(
                                 'Log In',
                                 style: TextStyle(
@@ -186,6 +222,7 @@ class LoginPage extends StatelessWidget {
                               const Text('Username'),
                               const SizedBox(height: 6),
                               TextField(
+                                controller: emailController,
                                 decoration: InputDecoration(
                                   filled: true,
                                   fillColor: Colors.white,
@@ -210,6 +247,7 @@ class LoginPage extends StatelessWidget {
                               const Text('Password'),
                               const SizedBox(height: 6),
                               TextField(
+                                controller: passwordController,
                                 obscureText: true,
                                 decoration: InputDecoration(
                                   filled: true,
@@ -235,7 +273,43 @@ class LoginPage extends StatelessWidget {
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    final email = emailController.text.trim();
+                                    final password =
+                                        passwordController.text.trim();
+
+                                    final matchedUser = users.firstWhere(
+                                      (user) =>
+                                          user['email'] == email &&
+                                          user['password'] == password,
+                                      orElse: () => {},
+                                    );
+
+                                    if (matchedUser.isNotEmpty) {
+                                      if (matchedUser['role'] == 'customer') {
+                                        Navigator.pushNamed(
+                                          context,
+                                          '/dashboard',
+                                        );
+                                      } else if (matchedUser['role'] ==
+                                          'admin') {
+                                        Navigator.pushNamed(
+                                          context,
+                                          '/admin_dashboard',
+                                        );
+                                      }
+                                    } else {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Invalid email or password',
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
                                   style: ElevatedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 16,
@@ -243,7 +317,7 @@ class LoginPage extends StatelessWidget {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(30),
                                     ),
-                                    backgroundColor: Color(0xFF6BC6E4),
+                                    backgroundColor: const Color(0xFF6BC6E4),
                                   ),
                                   child: const Text(
                                     'Login',

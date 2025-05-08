@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:techie/admindashboard.dart';
+import 'package:techie/dashboard.dart';
 import 'package:techie/login.dart';
 
 void main() {
@@ -12,6 +14,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      routes: {
+        '/dashboard': (context) => DashboardScreen(),
+        '/admin_dashboard': (context) => Admindashboard(),
+      },
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
