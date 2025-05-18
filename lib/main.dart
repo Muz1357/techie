@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:techie/admindashboard.dart';
+import 'package:techie/cart.dart';
 import 'package:techie/dashboard.dart';
 import 'package:techie/login.dart';
+import 'package:techie/setting.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +17,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       routes: {
         '/dashboard': (context) => DashboardScreen(),
-        '/admin_dashboard': (context) => Admindashboard(),
+        '/cart': (context) => Cart(),
+        '/setting': (context) => Settings(),
       },
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',

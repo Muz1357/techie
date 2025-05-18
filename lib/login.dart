@@ -31,10 +31,6 @@ class LoginPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Image.asset('assets/images/icon2.png', width: 40, height: 40),
-            const CircleAvatar(
-              radius: 20,
-              backgroundImage: AssetImage('assets/icons/icon1.png'),
-            ),
           ],
         ),
       ),
