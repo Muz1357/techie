@@ -15,7 +15,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     switch (index) {
       case 0:
-        // Already on dashboard
         break;
       case 1:
         Navigator.pushNamed(context, '/cart');
@@ -33,10 +32,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
     final int crossAxisCount = orientation == Orientation.landscape ? 3 : 2;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF6BC6E4),
+        backgroundColor: colorScheme.primary,
         automaticallyImplyLeading: false,
         elevation: 0,
         title: Row(
@@ -57,8 +58,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   },
                   child: Container(
                     padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary,
                       shape: BoxShape.circle,
                     ),
                     child: Image.asset(
@@ -91,7 +92,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               height: 200,
               width: double.infinity,
               decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFF6BC6E4), width: 2),
+                border: Border.all(color: colorScheme.primary, width: 2),
                 borderRadius: BorderRadius.circular(16),
                 color: Colors.white,
                 boxShadow: const [
@@ -109,7 +110,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   fit: BoxFit.cover,
                   errorBuilder:
                       (context, error, stackTrace) =>
-                          const Center(child: Text("Image not found")),
+                          Center(child: Text("Image not found")),
                 ),
               ),
             ),
@@ -137,15 +138,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Navigator.pushNamed(context, '/masterdetail');
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: const Color(0xFF6BC6E4),
+                            color: colorScheme.primary,
                             width: 2,
                           ),
-                          boxShadow: const [
+                          boxShadow: [
                             BoxShadow(
                               color: Colors.black12,
                               blurRadius: 6,
@@ -162,28 +163,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               fit: BoxFit.cover,
                               errorBuilder:
                                   (context, error, stackTrace) =>
-                                      const Icon(Icons.broken_image),
+                                      Icon(Icons.broken_image),
                             ),
-                            const SizedBox(height: 8),
-                            const Text(
+                            SizedBox(height: 8),
+                            Text(
                               'Samsung A53',
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 16),
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: colorScheme.primary,
+                              ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF6BC6E4),
+                        backgroundColor: colorScheme.primary,
                         shape: const StadiumBorder(),
                       ),
-                      onPressed: () {
-                        // TODO: Add to cart logic
-                      },
-                      child: const Text('Add to Cart'),
+                      onPressed: () {},
+                      child: Text(
+                        'Add to Cart',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ],
                 );
@@ -194,7 +199,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        selectedItemColor: const Color(0xFF6BC6E4),
+        selectedItemColor: colorScheme.primary,
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
         items: const [

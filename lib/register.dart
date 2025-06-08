@@ -7,11 +7,13 @@ class RegisterPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final isPortrait =
         MediaQuery.of(context).orientation == Orientation.portrait;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF6BC6E4),
+        backgroundColor: colorScheme.primary,
         automaticallyImplyLeading: false,
         elevation: 0,
         title: Row(
@@ -43,21 +45,16 @@ class RegisterPage extends StatelessWidget {
                       TextField(
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: Colors.white,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 20,
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(
-                              color: Color(0xFF6BC6E4),
-                            ),
+                            borderSide: BorderSide(color: colorScheme.primary),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(
-                              color: Color(0xFF6BC6E4),
-                            ),
+                            borderSide: BorderSide(color: colorScheme.primary),
                           ),
                         ),
                       ),
@@ -68,21 +65,16 @@ class RegisterPage extends StatelessWidget {
                         obscureText: true,
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: Colors.white,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 20,
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(
-                              color: Color(0xFF6BC6E4),
-                            ),
+                            borderSide: BorderSide(color: colorScheme.primary),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(
-                              color: Color(0xFF6BC6E4),
-                            ),
+                            borderSide: BorderSide(color: colorScheme.primary),
                           ),
                         ),
                       ),
@@ -96,7 +88,7 @@ class RegisterPage extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
-                            backgroundColor: const Color(0xFF6BC6E4),
+                            backgroundColor: colorScheme.primary,
                           ),
                           child: const Text(
                             'Create Account',
@@ -156,14 +148,14 @@ class RegisterPage extends StatelessWidget {
                                   ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(30),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xFF6BC6E4),
+                                    borderSide: BorderSide(
+                                      color: colorScheme.primary,
                                     ),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(30),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xFF6BC6E4),
+                                    borderSide: BorderSide(
+                                      color: colorScheme.primary,
                                     ),
                                   ),
                                 ),
@@ -181,14 +173,14 @@ class RegisterPage extends StatelessWidget {
                                   ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(30),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xFF6BC6E4),
+                                    borderSide: BorderSide(
+                                      color: colorScheme.primary,
                                     ),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(30),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xFF6BC6E4),
+                                    borderSide: BorderSide(
+                                      color: colorScheme.primary,
                                     ),
                                   ),
                                 ),
@@ -205,7 +197,7 @@ class RegisterPage extends StatelessWidget {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(30),
                                     ),
-                                    backgroundColor: const Color(0xFF6BC6E4),
+                                    backgroundColor: colorScheme.primary,
                                   ),
                                   child: const Text(
                                     'Create Account',

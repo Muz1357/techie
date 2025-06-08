@@ -8,13 +8,13 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<Settings> {
-  final nameController = TextEditingController(text: 'John Doe');
-  final contactController = TextEditingController(text: '+94 712345678');
-  final addressController = TextEditingController(text: '123, Main Street');
+  final nameController = TextEditingController(text: 'Mudeen Mohomad');
+  final contactController = TextEditingController(text: '+94 76834778');
+  final addressController = TextEditingController(text: 'kurunegala');
   final address2Controller = TextEditingController(text: 'Apt 4B');
-  final cityController = TextEditingController(text: 'Colombo');
-  final provinceController = TextEditingController(text: 'Western');
-  final postalCodeController = TextEditingController(text: '00100');
+  final cityController = TextEditingController(text: 'Kurunegala');
+  final provinceController = TextEditingController(text: 'North Western');
+  final postalCodeController = TextEditingController(text: '60410');
 
   int _selectedIndex = 3;
 
@@ -46,16 +46,18 @@ class _SettingsPageState extends State<Settings> {
         Navigator.pushReplacementNamed(context, '/orders');
         break;
       case 3:
-        // Stay on settings
         break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF6BC6E4),
+        backgroundColor: colorScheme.primary,
         automaticallyImplyLeading: false,
         elevation: 0,
         title: Row(
@@ -107,7 +109,7 @@ class _SettingsPageState extends State<Settings> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        selectedItemColor: const Color(0xFF6BC6E4),
+        selectedItemColor: colorScheme.primary,
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
         items: const [
@@ -130,6 +132,9 @@ class _SettingsPageState extends State<Settings> {
   }
 
   Widget buildForm() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -152,13 +157,14 @@ class _SettingsPageState extends State<Settings> {
             ),
             const SizedBox(width: 16),
             ElevatedButton(
-              onPressed: () {
-                // TODO: Implement picture change functionality
-              },
+              onPressed: () {},
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6BC6E4),
+                backgroundColor: colorScheme.primary,
               ),
-              child: const Text('Change Picture'),
+              child: Text(
+                'Change Picture',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         ),
@@ -185,7 +191,7 @@ class _SettingsPageState extends State<Settings> {
           ],
         ),
 
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         buildTextField('Postal Code', postalCodeController),
 
         const SizedBox(height: 24),
@@ -198,7 +204,7 @@ class _SettingsPageState extends State<Settings> {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6BC6E4),
+              backgroundColor: colorScheme.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
@@ -206,7 +212,10 @@ class _SettingsPageState extends State<Settings> {
             ),
             child: const Padding(
               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              child: Text('Save Changes', style: TextStyle(fontSize: 16)),
+              child: Text(
+                'Save Changes',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
             ),
           ),
         ),

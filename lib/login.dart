@@ -8,23 +8,19 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final isPortrait =
         MediaQuery.of(context).orientation == Orientation.portrait;
-
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
 
     final List<Map<String, String>> users = [
-      {
-        'email': 'customer@example.com',
-        'password': 'customer123',
-        'role': 'customer',
-      },
-      {'email': 'admin@example.com', 'password': 'admin123', 'role': 'admin'},
+      {'email': 'customer@gmail.com', 'password': '1234', 'role': 'customer'},
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF6BC6E4),
+        backgroundColor: colorScheme.primary,
         automaticallyImplyLeading: false,
         elevation: 0,
         title: Row(
@@ -81,21 +77,16 @@ class LoginPage extends StatelessWidget {
                         controller: emailController,
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: Colors.white,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 20,
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(
-                              color: Color(0xFF6BC6E4),
-                            ),
+                            borderSide: BorderSide(color: colorScheme.primary),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(
-                              color: Color(0xFF6BC6E4),
-                            ),
+                            borderSide: BorderSide(color: colorScheme.primary),
                           ),
                         ),
                       ),
@@ -107,21 +98,16 @@ class LoginPage extends StatelessWidget {
                         obscureText: true,
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: Colors.white,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 20,
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(
-                              color: Color(0xFF6BC6E4),
-                            ),
+                            borderSide: BorderSide(color: colorScheme.primary),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(
-                              color: Color(0xFF6BC6E4),
-                            ),
+                            borderSide: BorderSide(color: colorScheme.primary),
                           ),
                         ),
                       ),
@@ -143,11 +129,6 @@ class LoginPage extends StatelessWidget {
                             if (matchedUser.isNotEmpty) {
                               if (matchedUser['role'] == 'customer') {
                                 Navigator.pushNamed(context, '/dashboard');
-                              } else if (matchedUser['role'] == 'admin') {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/admin_dashboard',
-                                );
                               }
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -162,7 +143,7 @@ class LoginPage extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
-                            backgroundColor: const Color(0xFF6BC6E4),
+                            backgroundColor: colorScheme.primary,
                           ),
                           child: const Text(
                             'Login',
@@ -227,14 +208,14 @@ class LoginPage extends StatelessWidget {
                                   ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(30),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xFF6BC6E4),
+                                    borderSide: BorderSide(
+                                      color: colorScheme.primary,
                                     ),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(30),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xFF6BC6E4),
+                                    borderSide: BorderSide(
+                                      color: colorScheme.primary,
                                     ),
                                   ),
                                 ),
@@ -253,14 +234,14 @@ class LoginPage extends StatelessWidget {
                                   ),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(30),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xFF6BC6E4),
+                                    borderSide: BorderSide(
+                                      color: colorScheme.primary,
                                     ),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(30),
-                                    borderSide: const BorderSide(
-                                      color: Color(0xFF6BC6E4),
+                                    borderSide: BorderSide(
+                                      color: colorScheme.primary,
                                     ),
                                   ),
                                 ),
@@ -287,12 +268,6 @@ class LoginPage extends StatelessWidget {
                                           context,
                                           '/dashboard',
                                         );
-                                      } else if (matchedUser['role'] ==
-                                          'admin') {
-                                        Navigator.pushNamed(
-                                          context,
-                                          '/admin_dashboard',
-                                        );
                                       }
                                     } else {
                                       ScaffoldMessenger.of(
@@ -313,7 +288,7 @@ class LoginPage extends StatelessWidget {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(30),
                                     ),
-                                    backgroundColor: const Color(0xFF6BC6E4),
+                                    backgroundColor: colorScheme.primary,
                                   ),
                                   child: const Text(
                                     'Login',

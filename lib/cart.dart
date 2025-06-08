@@ -19,10 +19,13 @@ class Cart extends StatelessWidget {
     double tax = subtotal * 0.05;
     double total = subtotal + tax;
 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shopping Cart'),
-        backgroundColor: Color(0xFF6BC6E4),
+        backgroundColor: colorScheme.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(12),
@@ -97,14 +100,15 @@ class Cart extends StatelessWidget {
             const SizedBox(height: 16),
 
             ElevatedButton(
-              onPressed: () {
-                // Add your checkout logic here
-              },
+              onPressed: () {},
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6BC6E4),
+                backgroundColor: colorScheme.primary,
                 minimumSize: const Size.fromHeight(50),
               ),
-              child: const Text('Proceed to Checkout'),
+              child: Text(
+                'Proceed to Checkout',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         ),
