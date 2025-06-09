@@ -1,11 +1,28 @@
 import 'package:flutter/material.dart';
 
-class Cart extends StatelessWidget {
-  final List<Map<String, dynamic>> cartItems = [
+class Cart extends StatefulWidget {
+  @override
+  State<Cart> createState() => _CartState();
+}
+
+class _CartState extends State<Cart> {
+  List<Map<String, dynamic>> cartItems = [
     {
       'name': 'Samsung A53',
       'price': 10000.00,
       'quantity': 2,
+      'image': 'assets/images/phone.png',
+    },
+    {
+      'name': 'iPhone 13',
+      'price': 15000.00,
+      'quantity': 1,
+      'image': 'assets/images/phone.png',
+    },
+    {
+      'name': 'Google Pixel 7',
+      'price': 12000.00,
+      'quantity': 1,
       'image': 'assets/images/phone.png',
     },
   ];
@@ -32,41 +49,52 @@ class Cart extends StatelessWidget {
         child: Column(
           children: [
             Expanded(
-              child: ListView.builder(
-                itemCount: cartItems.length,
-                itemBuilder: (context, index) {
-                  var item = cartItems[index];
-                  double itemTotal = item['price'] * item['quantity'];
+              child:
+                  cartItems.isEmpty
+                      ? const Center(child: Text("Your cart is empty."))
+                      : ListView.builder(
+                        itemCount: cartItems.length,
+                        itemBuilder: (context, index) {
+                          var item = cartItems[index];
+                          double itemTotal = item['price'] * item['quantity'];
 
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 6),
-                    child: ListTile(
-                      leading: Image.asset(
-                        'assets/images/phone.png',
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
+                          return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 6),
+                            child: ListTile(
+                              leading: Image.asset(
+                                item['image'],
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.cover,
+                              ),
+                              title: Text(item['name']),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Qty: ${item['quantity']}'),
+                                  Text(
+                                    'Total: \$${itemTotal.toStringAsFixed(2)}',
+                                  ),
+                                ],
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    cartItems.removeAt(index);
+                                  });
+                                },
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                      title: Text(item['name']),
-                      subtitle: Text('Qty: ${item['quantity']}'),
-                      trailing: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('\$${item['price'].toStringAsFixed(2)}'),
-                          Text(
-                            'Total: \$${itemTotal.toStringAsFixed(2)}',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
             ),
 
-            Divider(height: 32),
+            const Divider(height: 32),
 
             // Checkout info
             Row(
@@ -100,12 +128,12 @@ class Cart extends StatelessWidget {
             const SizedBox(height: 16),
 
             ElevatedButton(
-              onPressed: () {},
+              onPressed: cartItems.isEmpty ? null : () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorScheme.primary,
                 minimumSize: const Size.fromHeight(50),
               ),
-              child: Text(
+              child: const Text(
                 'Proceed to Checkout',
                 style: TextStyle(color: Colors.white),
               ),
