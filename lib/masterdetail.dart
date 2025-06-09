@@ -18,7 +18,6 @@ class MasterDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Product Image
             Container(
               height: 250,
               width: double.infinity,
@@ -50,21 +49,18 @@ class MasterDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // Product Price
             Text(
               '\$499.00',
               style: TextStyle(fontSize: 20, color: colorScheme.secondary),
             ),
             const SizedBox(height: 16),
 
-            // Product Description
             const Text(
               'This is the Samsung Galaxy A53, featuring a stunning Super AMOLED display, long-lasting battery life, and a high-quality camera setup. Great for performance and style.',
               style: TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 24),
 
-            // Add to Cart Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

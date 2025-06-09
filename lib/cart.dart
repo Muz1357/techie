@@ -96,7 +96,6 @@ class _CartState extends State<Cart> {
 
             const Divider(height: 32),
 
-            // Checkout info
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

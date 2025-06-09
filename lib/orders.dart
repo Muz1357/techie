@@ -8,7 +8,6 @@ class OrdersScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Dummy order list
     final List<Map<String, dynamic>> orders = [
       {
         'id': 'ORD001',
