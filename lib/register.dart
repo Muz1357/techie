@@ -142,7 +142,6 @@ class RegisterPage extends StatelessWidget {
                               TextField(
                                 decoration: InputDecoration(
                                   filled: true,
-                                  fillColor: Colors.white,
                                   contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 20,
                                   ),
@@ -167,7 +166,6 @@ class RegisterPage extends StatelessWidget {
                                 obscureText: true,
                                 decoration: InputDecoration(
                                   filled: true,
-                                  fillColor: Colors.white,
                                   contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 20,
                                   ),

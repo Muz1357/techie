@@ -202,7 +202,6 @@ class LoginPage extends StatelessWidget {
                                 controller: emailController,
                                 decoration: InputDecoration(
                                   filled: true,
-                                  fillColor: Colors.white,
                                   contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 20,
                                   ),
@@ -228,7 +227,6 @@ class LoginPage extends StatelessWidget {
                                 obscureText: true,
                                 decoration: InputDecoration(
                                   filled: true,
-                                  fillColor: Colors.white,
                                   contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 20,
                                   ),
