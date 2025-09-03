@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 
 class MasterDetailScreen extends StatelessWidget {
   const MasterDetailScreen({super.key});
@@ -8,9 +9,12 @@ class MasterDetailScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    final dynamic product =
+        ModalRoute.of(context)!.settings.arguments as dynamic;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Product Details'),
+        title: Text(product['name'] ?? 'Product Details'),
         backgroundColor: colorScheme.primary,
       ),
       body: SingleChildScrollView(
@@ -27,20 +31,30 @@ class MasterDetailScreen extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(14),
-                child: Image.asset(
-                  'assets/images/phone.png',
-                  fit: BoxFit.cover,
-                  errorBuilder:
-                      (context, error, stackTrace) =>
-                          const Center(child: Icon(Icons.broken_image)),
-                ),
+                child:
+                    (product['image_url'] != null &&
+                            product['image_url'].toString().isNotEmpty)
+                        ? Image.network(
+                          product['image_url'],
+                          fit: BoxFit.contain,
+                          errorBuilder:
+                              (context, error, stackTrace) =>
+                                  const Center(child: Icon(Icons.broken_image)),
+                        )
+                        : const Center(
+                          child: Icon(
+                            Icons.image,
+                            size: 80,
+                            color: Colors.grey,
+                          ),
+                        ),
               ),
             ),
             const SizedBox(height: 20),
 
             // Product Title
             Text(
-              'Samsung A53',
+              product['name'] ?? 'No Name',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -49,18 +63,22 @@ class MasterDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
+            // Price
             Text(
-              '\$499.00',
+              "\$${product['price'] ?? '0'}",
               style: TextStyle(fontSize: 20, color: colorScheme.secondary),
             ),
             const SizedBox(height: 16),
 
-            const Text(
-              'This is the Samsung Galaxy A53, featuring a stunning Super AMOLED display, long-lasting battery life, and a high-quality camera setup. Great for performance and style.',
-              style: TextStyle(fontSize: 16),
+            // Description
+            Text(
+              product['description'] ??
+                  "No description available for this product.",
+              style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 24),
 
+            // Add to Cart Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -71,13 +89,23 @@ class MasterDetailScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Added to cart!"),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
+                onPressed: () async {
+                  try {
+                    await ApiService.addToCart(product['id']);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("${product['name']} added to cart!"),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Failed to add to cart"),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
                 },
                 child: const Text(
                   'Add to Cart',
