@@ -43,7 +43,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
       if (success) {
         _showMessage("Registration successful");
-        Navigator.pop(context); // Go back to login
+        Navigator.pop(context);
       } else {
         _showMessage("Registration failed");
       }

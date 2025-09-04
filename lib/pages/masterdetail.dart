@@ -52,7 +52,6 @@ class MasterDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Product Title
             Text(
               product['name'] ?? 'No Name',
               style: TextStyle(
@@ -63,14 +62,12 @@ class MasterDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // Price
             Text(
-              "\$${product['price'] ?? '0'}",
+              "\Rs.${product['price'] ?? '0'}",
               style: TextStyle(fontSize: 20, color: colorScheme.secondary),
             ),
             const SizedBox(height: 16),
 
-            // Description
             Text(
               product['description'] ??
                   "No description available for this product.",
@@ -78,7 +75,6 @@ class MasterDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Add to Cart Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

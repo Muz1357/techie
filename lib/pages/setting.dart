@@ -89,7 +89,6 @@ class _SettingsPageState extends State<Settings> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Account deleted successfully')),
       );
-      // Optional: Navigate to login screen
     } catch (e) {
       ScaffoldMessenger.of(
         context,

@@ -31,7 +31,6 @@ class _ProductsPageState extends State<ProductsPage> {
 
       if (gForce > shakeThreshold / 10) {
         final now = DateTime.now();
-
         if (_lastShakeTime == null ||
             now.difference(_lastShakeTime!).inMilliseconds > 1000) {
           _lastShakeTime = now;
@@ -73,7 +72,7 @@ class _ProductsPageState extends State<ProductsPage> {
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Failed to add to cart")));
+      ).showSnackBar(const SnackBar(content: Text("Failed to add to cart")));
     }
   }
 
@@ -155,8 +154,6 @@ class _ProductsPageState extends State<ProductsPage> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-
-            // Product Grid
             FutureBuilder<List<dynamic>>(
               future: _productsFuture,
               builder: (context, snapshot) {
@@ -169,99 +166,101 @@ class _ProductsPageState extends State<ProductsPage> {
                 }
 
                 final products = snapshot.data!;
-                return GridView.count(
-                  crossAxisCount: crossAxisCount,
+                return GridView.builder(
+                  itemCount: products.length,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio:
-                      orientation == Orientation.landscape ? 1.2 : 0.7,
-                  children: List.generate(products.length, (index) {
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.7,
+                  ),
+                  itemBuilder: (context, index) {
                     final product = products[index];
-                    return Column(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              '/masterdetail',
-                              arguments: product,
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: colorScheme.primary,
-                                width: 2,
-                              ),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 6,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                product['image_url'] != null &&
-                                        product['image_url']
-                                            .toString()
-                                            .isNotEmpty
-                                    ? Image.network(
-                                      product['image_url'],
-                                      width: 80,
-                                      height: 80,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              const Icon(Icons.broken_image),
-                                    )
-                                    : const Icon(
-                                      Icons.image,
-                                      size: 80,
-                                      color: Colors.grey,
+                    return Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(color: colorScheme.primary, width: 2),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/masterdetail',
+                                  arguments: product,
+                                );
+                              },
+                              child: Column(
+                                children: [
+                                  product['image_url'] != null &&
+                                          product['image_url']
+                                              .toString()
+                                              .isNotEmpty
+                                      ? Image.network(
+                                        product['image_url'],
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                const Icon(
+                                                  Icons.broken_image,
+                                                  size: 80,
+                                                ),
+                                      )
+                                      : const Icon(
+                                        Icons.image,
+                                        size: 80,
+                                        color: Colors.grey,
+                                      ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    product['name'] ?? "No Name",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: colorScheme.primary,
                                     ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  product['name'] ?? "No Name",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: colorScheme.primary,
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  "\$${product['price'] ?? "0"}",
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black54,
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "\Rs.${product['price'] ?? "0"}",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: colorScheme.primary,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: colorScheme.primary,
+                                  shape: const StadiumBorder(),
+                                ),
+                                onPressed: () => _addToCart(product),
+                                child: const Text(
+                                  'Add to Cart',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: colorScheme.primary,
-                            shape: const StadiumBorder(),
-                          ),
-                          onPressed: () => _addToCart(product),
-                          child: const Text(
-                            'Add to Cart',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ],
+                      ),
                     );
-                  }),
+                  },
                 );
               },
             ),

@@ -61,7 +61,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     colorScheme,
                   );
 
-                  // ✅ Safe parsing of total
                   final double total =
                       double.tryParse(order['total']?.toString() ?? '0') ?? 0.0;
 
@@ -148,12 +147,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   Color _getStatusColor(String? status, ColorScheme scheme) {
     switch (status?.toLowerCase()) {
-      case 'delivered':
-        return Colors.green;
-      case 'processing':
-        return scheme.primary;
-      case 'cancelled':
-        return Colors.red;
       default:
         return Colors.grey;
     }

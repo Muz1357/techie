@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:techie/pages/register.dart';
-import '../services/api_service.dart'; // make sure this file is created from previous step
+import '../services/api_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
