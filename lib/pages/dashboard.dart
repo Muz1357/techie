@@ -1,7 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'dart:math';
+import 'package:provider/provider.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:techie/provider/UserProvider.dart';
 import '../services/api_service.dart';
+
+class ProductsPageWrapper extends StatelessWidget {
+  const ProductsPageWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
+    if (userProvider.userId == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    return const ProductsPage();
+  }
+}
 
 class ProductsPage extends StatefulWidget {
   const ProductsPage({super.key});
@@ -10,9 +28,11 @@ class ProductsPage extends StatefulWidget {
   State<ProductsPage> createState() => _ProductsPageState();
 }
 
-class _ProductsPageState extends State<ProductsPage> {
+class _ProductsPageState extends State<ProductsPage> with RouteAware {
+  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref("cart");
   late Future<List<dynamic>> _productsFuture;
   int _selectedIndex = 0;
+  final Map<int, bool> _addingToCartMap = {}; // Track loading state per product
 
   static const double shakeThreshold = 15.0;
   DateTime? _lastShakeTime;
@@ -40,6 +60,38 @@ class _ProductsPageState extends State<ProductsPage> {
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateSelectedIndexFromRoute();
+  }
+
+  // Ensure bottom nav index resets after returning from another page
+  @override
+  void didPopNext() {
+    _updateSelectedIndexFromRoute();
+  }
+
+  void _updateSelectedIndexFromRoute() {
+    final currentRoute = ModalRoute.of(context)?.settings.name;
+    switch (currentRoute) {
+      case '/dashboard':
+        setState(() => _selectedIndex = 0);
+        break;
+      case '/cart':
+        setState(() => _selectedIndex = 1);
+        break;
+      case '/orders':
+        setState(() => _selectedIndex = 2);
+        break;
+      case '/setting':
+        setState(() => _selectedIndex = 3);
+        break;
+      default:
+        setState(() => _selectedIndex = 0);
+    }
+  }
+
   Future<List<dynamic>> _fetchProducts() async {
     try {
       final products = await ApiService.getProducts();
@@ -63,215 +115,298 @@ class _ProductsPageState extends State<ProductsPage> {
     );
   }
 
-  void _addToCart(dynamic product) async {
-    try {
-      await ApiService.addToCart(product['id']);
+  Future<void> _addToCart(dynamic product) async {
+    final int productId = product['id'];
+
+    // Check if this product is already being added
+    if (_addingToCartMap[productId] == true) return;
+
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.userId;
+
+    if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("${product['name']} added to cart")),
+        const SnackBar(content: Text("Please log in to add items to cart")),
+      );
+      return;
+    }
+
+    // Set loading state for this specific product
+    setState(() {
+      _addingToCartMap[productId] = true;
+    });
+
+    try {
+      final firebaseKey = productId.toString();
+      final snapshot =
+          await _dbRef
+              .child(userId.toString())
+              .child("items")
+              .child(firebaseKey)
+              .get();
+
+      if (snapshot.exists) {
+        final existing = Map<String, dynamic>.from(snapshot.value as Map);
+        final currentQty = _parseQuantity(existing['quantity']);
+        await _dbRef
+            .child(userId.toString())
+            .child("items")
+            .child(firebaseKey)
+            .update({
+              'quantity': currentQty + 1,
+              'updated_at': DateTime.now().millisecondsSinceEpoch,
+            });
+      } else {
+        final newItem = {
+          "id": null,
+          "cart_id": null,
+          "product_id": product['id'],
+          "quantity": 1,
+          "price": product['price']?.toString() ?? '0.0',
+          "name": product['name'],
+          "image_url": product['image_url'] ?? '',
+          "is_pending": true,
+          "created_at": DateTime.now().millisecondsSinceEpoch,
+          "updated_at": DateTime.now().millisecondsSinceEpoch,
+        };
+
+        await _dbRef
+            .child(userId.toString())
+            .child("items")
+            .child(firebaseKey)
+            .set(newItem);
+
+        try {
+          final res = await ApiService.addToCart(product['id']);
+          final mysqlItem = res['item'];
+          await _dbRef
+              .child(userId.toString())
+              .child("items")
+              .child(firebaseKey)
+              .update({
+                'id': mysqlItem['id'],
+                'cart_id': mysqlItem['cart_id'],
+                'is_pending': false,
+              });
+        } catch (e) {
+          debugPrint("MySQL sync failed: $e");
+        }
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("${product['name']} added to cart!"),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Failed to add to cart")));
+      debugPrint("Add to cart error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Failed to add to cart"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      // Clear loading state for this specific product
+      setState(() {
+        _addingToCartMap[productId] = false;
+      });
     }
   }
 
-  void _onItemTapped(int index) {
+  int _parseQuantity(dynamic q) {
+    if (q == null) return 1;
+    if (q is int) return q;
+    if (q is String) return int.tryParse(q) ?? 1;
+    if (q is double) return q.toInt();
+    return 1;
+  }
+
+  void _onItemTapped(int index) async {
     setState(() => _selectedIndex = index);
 
     switch (index) {
       case 0:
+        Navigator.pushNamedAndRemoveUntil(context, '/dashboard', (r) => false);
         break;
       case 1:
-        Navigator.pushNamed(context, '/cart');
+        await Navigator.pushNamed(context, '/cart');
+        _updateSelectedIndexFromRoute();
         break;
       case 2:
-        Navigator.pushNamed(context, '/orders');
+        await Navigator.pushNamed(context, '/orders');
+        _updateSelectedIndexFromRoute();
         break;
       case 3:
-        Navigator.pushNamed(context, '/setting');
+        await Navigator.pushNamed(context, '/setting');
+        _updateSelectedIndexFromRoute();
         break;
+    }
+  }
+
+  Future<void> _logout() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Logout'),
+            content: const Text('Are you sure you want to logout?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text(
+                  'Logout',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+    );
+
+    if (shouldLogout == true) {
+      userProvider.clearUser();
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Logged out successfully')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final Orientation orientation = MediaQuery.of(context).orientation;
     final int crossAxisCount = orientation == Orientation.landscape ? 3 : 2;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Products'),
         backgroundColor: colorScheme.primary,
         automaticallyImplyLeading: false,
-        elevation: 0,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Image.asset(
-              'assets/images/icon2.png',
-              width: 40,
-              height: 40,
-              errorBuilder:
-                  (context, error, stackTrace) => const Icon(Icons.error),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            tooltip: "Logout",
+            onPressed: _logout,
+          ),
+        ],
+      ),
+      body: FutureBuilder<List<dynamic>>(
+        future: _productsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text("No products available"));
+          }
+
+          final products = snapshot.data!;
+          return GridView.builder(
+            itemCount: products.length,
+            padding: const EdgeInsets.all(16),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 0.7,
             ),
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(context, '/cart');
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary,
-                      shape: BoxShape.circle,
+            itemBuilder: (context, index) {
+              final product = products[index];
+              final int productId = product['id'];
+              final bool isAdding = _addingToCartMap[productId] == true;
+
+              return InkWell(
+                onTap:
+                    () => Navigator.pushNamed(
+                      context,
+                      '/masterdetail',
+                      arguments: product,
                     ),
-                    child: Image.asset(
-                      'assets/images/icon1.png',
-                      width: 30,
-                      height: 30,
-                      errorBuilder:
-                          (context, error, stackTrace) =>
-                              const Icon(Icons.error),
+                borderRadius: BorderRadius.circular(16),
+                splashColor: colorScheme.primary.withOpacity(0.2),
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: colorScheme.primary, width: 1.5),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Image.network(
+                          product['image_url'] ?? '',
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                          errorBuilder:
+                              (_, __, ___) => const Icon(
+                                Icons.image,
+                                size: 80,
+                                color: Colors.grey,
+                              ),
+                        ),
+                        Text(
+                          product['name'] ?? "No Name",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                        Text("Rs.${product['price'] ?? "0"}"),
+                        ElevatedButton.icon(
+                          onPressed:
+                              isAdding ? null : () => _addToCart(product),
+                          icon:
+                              isAdding
+                                  ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                  : const Icon(
+                                    Icons.add_shopping_cart,
+                                    size: 16,
+                                  ),
+                          label: Text(
+                            isAdding ? "Adding..." : "Add to Cart",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colorScheme.primary,
+                            minimumSize: const Size.fromHeight(35),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            ),
-          ],
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 24),
-            const Text(
-              'Products',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            FutureBuilder<List<dynamic>>(
-              future: _productsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text("Error: ${snapshot.error}"));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("No products available"));
-                }
-
-                final products = snapshot.data!;
-                return GridView.builder(
-                  itemCount: products.length,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 0.7,
-                  ),
-                  itemBuilder: (context, index) {
-                    final product = products[index];
-                    return Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: BorderSide(color: colorScheme.primary, width: 2),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/masterdetail',
-                                  arguments: product,
-                                );
-                              },
-                              child: Column(
-                                children: [
-                                  product['image_url'] != null &&
-                                          product['image_url']
-                                              .toString()
-                                              .isNotEmpty
-                                      ? Image.network(
-                                        product['image_url'],
-                                        width: 80,
-                                        height: 80,
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                const Icon(
-                                                  Icons.broken_image,
-                                                  size: 80,
-                                                ),
-                                      )
-                                      : const Icon(
-                                        Icons.image,
-                                        size: 80,
-                                        color: Colors.grey,
-                                      ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    product['name'] ?? "No Name",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: colorScheme.primary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "\Rs.${product['price'] ?? "0"}",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: colorScheme.primary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: colorScheme.primary,
-                                  shape: const StadiumBorder(),
-                                ),
-                                onPressed: () => _addToCart(product),
-                                child: const Text(
-                                  'Add to Cart',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ],
-        ),
+              );
+            },
+          );
+        },
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         selectedItemColor: colorScheme.primary,
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Dashboard'),
           BottomNavigationBarItem(

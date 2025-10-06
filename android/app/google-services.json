@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "307700786183",
+    "project_id": "techie-8e07b",
+    "storage_bucket": "techie-8e07b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307700786183:android:0826cbe5001e418b1976a2",
+        "android_client_info": {
+          "package_name": "com.example.techie"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCu0cNLl-WxTlwQkh3vSuFJTrV1kKFTjuo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

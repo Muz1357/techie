@@ -118,6 +118,7 @@ class _SettingsPageState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -135,18 +136,21 @@ class _SettingsPageState extends State<Settings> {
                       "Profile Information",
                       _buildProfileSection(),
                       colorScheme,
+                      theme,
                     ),
                     const SizedBox(height: 20),
                     _buildCard(
                       "Update Password",
                       _buildPasswordSection(),
                       colorScheme,
+                      theme,
                     ),
                     const SizedBox(height: 20),
                     _buildCard(
                       "Delete Account",
-                      _buildDeleteSection(),
+                      _buildDeleteSection(theme),
                       colorScheme,
+                      theme,
                       danger: true,
                     ),
                   ],
@@ -155,7 +159,10 @@ class _SettingsPageState extends State<Settings> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         selectedItemColor: colorScheme.primary,
-        unselectedItemColor: Colors.grey,
+        unselectedItemColor:
+            theme.brightness == Brightness.dark
+                ? Colors.grey[400]
+                : Colors.grey,
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Dashboard'),
@@ -179,22 +186,30 @@ class _SettingsPageState extends State<Settings> {
   Widget _buildCard(
     String title,
     Widget child,
-    ColorScheme scheme, {
+    ColorScheme scheme,
+    ThemeData theme, {
     bool danger = false,
   }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor, // Use theme card color instead of Colors.white
         border: Border.all(
           color: danger ? Colors.red : scheme.primary,
           width: 1.2,
         ),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
-        ],
+        boxShadow:
+            theme.brightness == Brightness.dark
+                ? null // Remove shadow in dark mode or use dark shadow
+                : const [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,7 +248,12 @@ class _SettingsPageState extends State<Settings> {
             style: ElevatedButton.styleFrom(
               backgroundColor: colorScheme.primary,
             ),
-            child: const Text("Save", style: TextStyle(color: Colors.white)),
+            child: Text(
+              "Save",
+              style: TextStyle(
+                color: colorScheme.onPrimary,
+              ), // Use onPrimary for text color
+            ),
           ),
         ),
       ],
@@ -269,9 +289,11 @@ class _SettingsPageState extends State<Settings> {
             style: ElevatedButton.styleFrom(
               backgroundColor: colorScheme.primary,
             ),
-            child: const Text(
+            child: Text(
               "Update Password",
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(
+                color: colorScheme.onPrimary,
+              ), // Use onPrimary for text color
             ),
           ),
         ),
@@ -279,13 +301,15 @@ class _SettingsPageState extends State<Settings> {
     );
   }
 
-  Widget _buildDeleteSection() {
+  Widget _buildDeleteSection(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "Once your account is deleted, all of its resources and data will be permanently deleted.",
-          style: TextStyle(color: Colors.black87),
+          style: TextStyle(
+            color: theme.textTheme.bodyMedium?.color ?? Colors.black87,
+          ), // Use theme text color
         ),
         const SizedBox(height: 12),
         ElevatedButton(
@@ -307,14 +331,30 @@ class _SettingsPageState extends State<Settings> {
     bool obscureText = false,
     TextInputType keyboardType = TextInputType.text,
   }) {
+    final theme = Theme.of(context);
+
     return TextField(
       controller: controller,
       maxLines: maxLines,
       obscureText: obscureText,
       keyboardType: keyboardType,
+      style: TextStyle(
+        color: theme.textTheme.bodyMedium?.color,
+      ), // Set text color from theme
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: TextStyle(
+          color: theme.textTheme.bodyMedium?.color,
+        ), // Label color from theme
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: theme.colorScheme.outline),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: theme.colorScheme.primary),
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
     );
   }

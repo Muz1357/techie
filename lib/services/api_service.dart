@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
@@ -68,9 +70,7 @@ class ApiService {
       headers: _headers,
     );
     if (response.statusCode == 200) {
-      return jsonDecode(
-        response.body,
-      )['data']; // Laravel returns data under 'data'
+      return jsonDecode(response.body)['data'];
     }
     throw Exception("Failed to fetch profile");
   }
@@ -182,7 +182,7 @@ class ApiService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     }
-    throw Exception("Failed to update cart item");
+    throw Exception("Failed to update cart item: ${response.statusCode}");
   }
 
   static Future<bool> removeCartItem(int itemId) async {
@@ -190,20 +190,82 @@ class ApiService {
       Uri.parse("$baseUrl/cart/$itemId"),
       headers: _headers,
     );
-    return response.statusCode == 200;
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw Exception("Failed to remove cart item: ${response.statusCode}");
+    }
   }
 
   /// CHECKOUT
   static Future<Map<String, dynamic>> checkout(String address) async {
-    final response = await http.post(
-      Uri.parse("$baseUrl/checkout"),
-      headers: _headers,
-      body: jsonEncode({"address": address}),
-    );
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+    http.Response? response;
+
+    try {
+      debugPrint("🚀 CHECKOUT API CALL STARTED");
+      debugPrint("📝 URL: $baseUrl/checkout");
+      debugPrint("📦 Request Headers: $_headers");
+      debugPrint("📦 Request Body: ${jsonEncode({"address": address})}");
+
+      final startTime = DateTime.now();
+
+      response = await http
+          .post(
+            Uri.parse("$baseUrl/checkout"),
+            headers: _headers,
+            body: jsonEncode({"address": address}),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final endTime = DateTime.now();
+      final duration = endTime.difference(startTime);
+
+      debugPrint("⏱️ Request duration: ${duration.inMilliseconds}ms");
+      debugPrint("📡 Response Status Code: ${response.statusCode}");
+      debugPrint("📡 Response Headers: ${response.headers}");
+      debugPrint("📡 Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        try {
+          final responseData = jsonDecode(response.body);
+          debugPrint("CHECKOUT SUCCESSFUL: $responseData");
+          return responseData;
+        } catch (e) {
+          debugPrint("JSON PARSE ERROR: $e");
+          throw Exception("Invalid response format from server");
+        }
+      } else {
+        debugPrint("SERVER ERROR: ${response.statusCode}");
+
+        String errorMessage =
+            "Checkout failed with status: ${response.statusCode}";
+        try {
+          final errorData = jsonDecode(response.body);
+          if (errorData['message'] != null) {
+            errorMessage = errorData['message'];
+          } else if (errorData['error'] != null) {
+            errorMessage = errorData['error'];
+          }
+        } catch (e) {
+          errorMessage =
+              response.body.isNotEmpty ? response.body : errorMessage;
+        }
+
+        throw Exception(errorMessage);
+      }
+    } on SocketException catch (e) {
+      debugPrint("❌ SOCKET EXCEPTION: $e");
+      debugPrint(
+        "❌ This usually indicates no internet connection or DNS failure",
+      );
+      throw Exception("No internet connection: Please check your network");
+    } finally {
+      if (response != null) {
+        debugPrint("🏁 Request completed with status: ${response.statusCode}");
+      } else {
+        debugPrint("🏁 Request failed - no response received");
+      }
     }
-    throw Exception("Checkout failed");
   }
 
   /// ORDERS
@@ -214,7 +276,7 @@ class ApiService {
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return data['data']; // pagination response
+      return data['data'];
     }
     throw Exception("Failed to fetch orders");
   }
